@@ -58,7 +58,7 @@ const createViewModelsForNodes = (linkableElementsQuery, labelQuery) =>
 						nodeId: nodeId,
 						searchLabel,
 						shortLabel,
-						value: nodeId
+						id: nodeId
 					};
 				})
 			);
@@ -140,10 +140,11 @@ class NodeBrowserModal extends Component {
 								/>
 							</ModalContent>
 
-							{selectedNode &&
+							{selectedNode && (
 								<ModalContent flexDirection="column" isScrollContainer>
 									<NodePreview node={selectedNode} />
-								</ModalContent>}
+								</ModalContent>
+							)}
 						</ModalContent>
 					</ModalContent>
 				</ModalBody>
