@@ -8,6 +8,7 @@ import evaluateXPathToNodes from 'fontoxml-selectors/evaluateXPathToNodes';
 import evaluateXPathToString from 'fontoxml-selectors/evaluateXPathToString';
 import getMarkupLabel from 'fontoxml-markup-documentation/getMarkupLabel';
 import getNodeId from 'fontoxml-dom-identification/getNodeId';
+import NodePreview from 'fontoxml-fx/NodePreview.jsx';
 import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
 import t from 'fontoxml-localization/t';
 
@@ -23,8 +24,7 @@ import {
 	SearchInput
 } from 'fontoxml-vendor-fds/components';
 
-import NodeList from './NodeList.jsx';
-import NodePreview from './NodePreview.jsx';
+import NodesList from './NodesList.jsx';
 
 const createViewModelsForNodes = (linkableElementsQuery, labelQuery) =>
 	documentsManager
@@ -54,7 +54,9 @@ const createViewModelsForNodes = (linkableElementsQuery, labelQuery) =>
 
 					return {
 						documentId,
-						markupLabel: caseConverter.uppercaseFirstLetter(getMarkupLabel(node)),
+						markupLabel: caseConverter.uppercaseFirstLetter(
+							getMarkupLabel(node) || node.nodeName
+						),
 						nodeId: nodeId,
 						searchLabel,
 						shortLabel,
@@ -66,7 +68,7 @@ const createViewModelsForNodes = (linkableElementsQuery, labelQuery) =>
 
 const searchInputContainerStyles = { maxWidth: '20rem', width: '100%' };
 
-class NodeBrowserModal extends Component {
+class NodesBrowserModal extends Component {
 	static propTypes = {
 		cancelModal: PropTypes.func.isRequired,
 		data: PropTypes.shape({
@@ -131,7 +133,7 @@ class NodeBrowserModal extends Component {
 
 						<ModalContent>
 							<ModalContent>
-								<NodeList
+								<NodesList
 									nodes={displayedNodes}
 									onItemClick={this.handleNodeListItemClick}
 									onItemDoubleClick={this.handleSubmit}
@@ -142,7 +144,10 @@ class NodeBrowserModal extends Component {
 
 							{selectedNode && (
 								<ModalContent flexDirection="column" isScrollContainer>
-									<NodePreview node={selectedNode} />
+									<NodePreview
+										documentId={selectedNode.documentId}
+										traversalRootNodeId={selectedNode.nodeId}
+									/>
 								</ModalContent>
 							)}
 						</ModalContent>
@@ -164,4 +169,4 @@ class NodeBrowserModal extends Component {
 	}
 }
 
-export default NodeBrowserModal;
+export default NodesBrowserModal;

@@ -11,7 +11,7 @@ import {
 	VirtualList
 } from 'fontoxml-vendor-fds/components';
 
-class NodeList extends PureComponent {
+class NodesList extends PureComponent {
 	handleRenderItem = ({ key, item, isSelected, onClick, onDoubleClick, onRef }) => (
 		<ListItem
 			key={key}
@@ -98,4 +98,4 @@ class NodeList extends PureComponent {
 	}
 }
 
-export default NodeList;
+export default NodesList;

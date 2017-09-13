@@ -1,15 +1,15 @@
 define([
 	'fontoxml-modular-ui/uiManager',
 
-	'./ui/NodeBrowserModal.jsx'
+	'./ui/NodesBrowserModal.jsx'
 ], function (
 	uiManager,
 
-	NodeBrowserModal
+	NodesBrowserModal
 ) {
 	'use strict';
 
 	return function install () {
-		uiManager.registerReactComponent('NodeBrowserModal', NodeBrowserModal);
+		uiManager.registerReactComponent('NodesBrowserModal', NodesBrowserModal);
 	};
 });
