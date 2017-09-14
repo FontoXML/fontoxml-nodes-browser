@@ -1,5 +1,5 @@
 {
-	"open-node-browser": {
+	"open-nodes-browser": {
 		"initialData": {
 			"linkableElementsQuery": "//*[@id]",
 			"modalPrimaryButtonLabel": "t__Insert",
