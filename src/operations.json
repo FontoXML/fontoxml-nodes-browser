@@ -1,5 +1,73 @@
 {
 	"open-nodes-browser": {
+		"__documentation": {
+			"fontosdk": true,
+			"summary": "Opens the nodes browser in which the user can select a node.",
+			"params": [
+				{
+					"name": "documentId",
+					"type": "DocumentId",
+					"description": [
+						"(Optional) Can be used to open the nodes browser with a node preselected. ",
+						"Should only be used in combination with nodeId"
+					]
+				},
+				{
+					"name": "labelQuery",
+					"type": "XPathQuery",
+					"description": [
+						"(Optional) The label for each node will be determined by the labelQuery. ",
+						"If the labelQuery is not specified, the label will be the text content of the node. ",
+						"Example: If you want the title of a node to be the label, ",
+						"the labelQuery could be `if(./title) then(./title) else(.)`."
+					]
+				},
+				{
+					"name": "linkableElementsQuery",
+					"type": "XPathQuery",
+					"description": [
+						"(Optional) The nodes that the user can choose from are specified by the linkableElementsQuery. ",
+						"The default of the linkableElementsQuery is `//*[@id]` which means all nodes with an @id attribute. ",
+						"Example: If you only want footnodes in your nodes list, the linkableElementsQuery could be `//fn`."
+					]
+				},
+				{
+					"name": "modalPrimaryButtonLabel",
+					"type": "string",
+					"description": [
+						"(Optional) The label for the button in the bottom right corner, when clicking this button ",
+						"the selected node will be submitted. The default value for this label is 't__Insert'."				]
+				},
+				{
+					"name": "modalTitle",
+					"type": "string",
+					"description": [
+						"(Optional) Specifies the title of the modal which is shown in the upper left corner. ",
+						"The default value for this title is 't__Select an element'."
+					]
+				},
+				{
+					"name": "nodeId",
+					"type": "NodeId",
+					"description": [
+						"(Optional) Can be used to open the nodes browser with a node preselected. ",
+						"Should only be used in combination with documentId"
+					]
+				}
+			],
+			"returns": [
+				{
+					"name": "documentId",
+					"type": "DocumentId",
+					"description": "The documentId of the document where the selected node is in."
+				},
+				{
+					"name": "nodeId",
+					"type": "NodeId",
+					"description": "The nodeId of the selected node."
+				}
+			]
+		},
 		"initialData": {
 			"linkableElementsQuery": "//*[@id]",
 			"modalPrimaryButtonLabel": "t__Insert",

@@ -72,10 +72,12 @@ class NodesBrowserModal extends Component {
 	static propTypes = {
 		cancelModal: PropTypes.func.isRequired,
 		data: PropTypes.shape({
+			documentId: PropTypes.string,
 			labelQuery: PropTypes.string,
 			linkableElementsQuery: PropTypes.string.isRequired,
 			modalPrimaryButtonLabel: PropTypes.string.isRequired,
-			modalTitle: PropTypes.string.isRequired
+			modalTitle: PropTypes.string.isRequired,
+			nodeId: PropTypes.string
 		}),
 		submitModal: PropTypes.func.isRequired
 	};
