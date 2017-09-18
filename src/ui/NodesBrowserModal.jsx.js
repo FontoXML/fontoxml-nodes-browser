@@ -8,7 +8,7 @@ import evaluateXPathToNodes from 'fontoxml-selectors/evaluateXPathToNodes';
 import evaluateXPathToString from 'fontoxml-selectors/evaluateXPathToString';
 import getMarkupLabel from 'fontoxml-markup-documentation/getMarkupLabel';
 import getNodeId from 'fontoxml-dom-identification/getNodeId';
-import NodePreview from 'fontoxml-fx/NodePreview.jsx';
+import FxNodePreview from 'fontoxml-fx/FxNodePreview.jsx';
 import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
 import t from 'fontoxml-localization/t';
 
@@ -146,7 +146,7 @@ class NodesBrowserModal extends Component {
 
 							{selectedNode && (
 								<ModalContent flexDirection="column" isScrollContainer>
-									<NodePreview
+									<FxNodePreview
 										documentId={selectedNode.documentId}
 										traversalRootNodeId={selectedNode.nodeId}
 									/>
