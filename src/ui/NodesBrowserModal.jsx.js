@@ -112,6 +112,20 @@ class NodesBrowserModal extends Component {
 	handleSubmit = node =>
 		this.props.submitModal({ nodeId: node.nodeId, documentId: node.documentId });
 
+	handleKeyDown = event => {
+		const { selectedNode } = this.state;
+		switch (event.key) {
+			case 'Escape':
+				this.props.cancelModal();
+				break;
+			case 'Enter':
+				if (selectedNode) {
+					this.handleSubmit(selectedNode);
+				}
+				break;
+		}
+	};
+
 	handleSubmitButtonClick = () => this.handleSubmit(this.state.selectedNode);
 
 	render() {
@@ -119,7 +133,7 @@ class NodesBrowserModal extends Component {
 		const { cancelModal, data: { modalPrimaryButtonLabel, modalTitle } } = this.props;
 
 		return (
-			<Modal size="m">
+			<Modal size="m" onKeyDown={this.handleKeyDown}>
 				<ModalHeader title={modalTitle} />
 
 				<ModalBody>
