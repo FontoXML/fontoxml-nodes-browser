@@ -1,5 +1,5 @@
 {
-	"open-nodes-browser": {
+	"open-nodes-browser-modal": {
 		"__documentation": {
 			"fontosdk": true,
 			"summary": "Opens the nodes browser in which the user can select a node.",
