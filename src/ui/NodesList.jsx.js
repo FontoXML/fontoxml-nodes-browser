@@ -1,15 +1,7 @@
 import React, { PureComponent } from 'react';
 
+import { Flex, Label, ListItem, StateMessage, Text, VirtualList } from 'fds/components';
 import t from 'fontoxml-localization/t';
-
-import {
-	Flex,
-	Label,
-	ListItem,
-	StateMessage,
-	Text,
-	VirtualList
-} from 'fontoxml-vendor-fds/components';
 
 class NodesList extends PureComponent {
 	handleRenderItem = ({ key, item, isSelected, onClick, onDoubleClick, onRef }) => (

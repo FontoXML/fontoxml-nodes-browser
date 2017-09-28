@@ -1,18 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import caseConverter from 'fontoxml-utils/caseConverter';
-import documentsManager from 'fontoxml-documents/documentsManager';
-import domQuery from 'fontoxml-dom-utils/domQuery';
-import evaluateXPathToNodes from 'fontoxml-selectors/evaluateXPathToNodes';
-import evaluateXPathToString from 'fontoxml-selectors/evaluateXPathToString';
-import getMarkupLabel from 'fontoxml-markup-documentation/getMarkupLabel';
-import getNodeId from 'fontoxml-dom-identification/getNodeId';
-import getTitleContent from 'fontoxml-markup-documentation/getTitleContent';
-import FxNodePreview from 'fontoxml-fx/FxNodePreview.jsx';
-import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
-import t from 'fontoxml-localization/t';
-
 import {
 	Button,
 	Flex,
@@ -23,7 +11,17 @@ import {
 	ModalFooter,
 	ModalHeader,
 	SearchInput
-} from 'fontoxml-vendor-fds/components';
+} from 'fds/components';
+import caseConverter from 'fontoxml-utils/caseConverter';
+import documentsManager from 'fontoxml-documents/documentsManager';
+import domQuery from 'fontoxml-dom-utils/domQuery';
+import evaluateXPathToNodes from 'fontoxml-selectors/evaluateXPathToNodes';
+import getMarkupLabel from 'fontoxml-markup-documentation/getMarkupLabel';
+import getTitleContent from 'fontoxml-markup-documentation/getTitleContent';
+import getNodeId from 'fontoxml-dom-identification/getNodeId';
+import FxNodePreview from 'fontoxml-fx/FxNodePreview.jsx';
+import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
+import t from 'fontoxml-localization/t';
 
 import NodesList from './NodesList.jsx';
 
