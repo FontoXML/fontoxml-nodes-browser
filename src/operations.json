@@ -13,16 +13,6 @@
 					]
 				},
 				{
-					"name": "labelQuery",
-					"type": "XPathQuery",
-					"description": [
-						"(Optional) The label for each node will be determined by the labelQuery. ",
-						"If the labelQuery is not specified, the label will be the text content of the node. ",
-						"Example: If you want the title of a node to be the label, ",
-						"the labelQuery could be `if(./title) then(./title) else(.)`."
-					]
-				},
-				{
 					"name": "linkableElementsQuery",
 					"type": "XPathQuery",
 					"description": [

@@ -8,6 +8,7 @@ import evaluateXPathToNodes from 'fontoxml-selectors/evaluateXPathToNodes';
 import evaluateXPathToString from 'fontoxml-selectors/evaluateXPathToString';
 import getMarkupLabel from 'fontoxml-markup-documentation/getMarkupLabel';
 import getNodeId from 'fontoxml-dom-identification/getNodeId';
+import getTitleContent from 'fontoxml-markup-documentation/getTitleContent';
 import FxNodePreview from 'fontoxml-fx/FxNodePreview.jsx';
 import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
 import t from 'fontoxml-localization/t';
@@ -26,7 +27,7 @@ import {
 
 import NodesList from './NodesList.jsx';
 
-const createViewModelsForNodes = (linkableElementsQuery, labelQuery) =>
+const createViewModelsForNodes = linkableElementsQuery =>
 	documentsManager
 		.getAllDocumentIds({ 'cap/operable': true })
 		.reduce((displayedNodes, documentId) => {
@@ -43,9 +44,7 @@ const createViewModelsForNodes = (linkableElementsQuery, labelQuery) =>
 					// Used for searches
 					const searchLabel = domQuery.getTextContent(node);
 
-					let shortLabel = labelQuery
-						? evaluateXPathToString(labelQuery, node, readOnlyBlueprint)
-						: searchLabel;
+					let shortLabel = getTitleContent(node) || searchLabel;
 					if (shortLabel === '') {
 						shortLabel = t('(Empty element)');
 					}
@@ -73,7 +72,6 @@ class NodesBrowserModal extends Component {
 		cancelModal: PropTypes.func.isRequired,
 		data: PropTypes.shape({
 			documentId: PropTypes.string,
-			labelQuery: PropTypes.string,
 			linkableElementsQuery: PropTypes.string.isRequired,
 			modalPrimaryButtonLabel: PropTypes.string.isRequired,
 			modalTitle: PropTypes.string.isRequired,
@@ -82,10 +80,7 @@ class NodesBrowserModal extends Component {
 		submitModal: PropTypes.func.isRequired
 	};
 
-	initialNodes = createViewModelsForNodes(
-		this.props.data.linkableElementsQuery,
-		this.props.data.labelQuery
-	);
+	initialNodes = createViewModelsForNodes(this.props.data.linkableElementsQuery);
 
 	state = {
 		displayedNodes: this.initialNodes,
