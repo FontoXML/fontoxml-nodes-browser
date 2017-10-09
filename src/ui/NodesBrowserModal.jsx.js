@@ -71,6 +71,7 @@ class NodesBrowserModal extends Component {
 		data: PropTypes.shape({
 			documentId: PropTypes.string,
 			linkableElementsQuery: PropTypes.string.isRequired,
+			modalIcon: PropTypes.string,
 			modalPrimaryButtonLabel: PropTypes.string.isRequired,
 			modalTitle: PropTypes.string.isRequired,
 			nodeId: PropTypes.string
@@ -123,11 +124,14 @@ class NodesBrowserModal extends Component {
 
 	render() {
 		const { displayedNodes, searchInput, selectedNode } = this.state;
-		const { cancelModal, data: { modalPrimaryButtonLabel, modalTitle } } = this.props;
+		const {
+			cancelModal,
+			data: { modalIcon, modalPrimaryButtonLabel, modalTitle }
+		} = this.props;
 
 		return (
 			<Modal size="m" onKeyDown={this.handleKeyDown}>
-				<ModalHeader title={modalTitle} />
+				<ModalHeader icon={modalIcon} title={modalTitle} />
 
 				<ModalBody>
 					<ModalContent flexDirection="column">

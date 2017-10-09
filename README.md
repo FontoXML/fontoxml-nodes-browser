@@ -19,6 +19,6 @@ The following properties can be used with this operation:
 
 * When this modal is used to edit an existing link, the `documentId` and `nodeId` properties can be used to set the selection on the original node.
 * The set of nodes which to choose from is specified by the `linkableElementsQuery`.
-* The modal title and primary button label can be set with the `modalTitle` and `modalPrimaryButtonLabel` respectively.
+* The modal icon, title and primary button label can be set with the `modalIcon`, `modalTitle` and `modalPrimaryButtonLabel` respectively.
 
 For more information see {@link operation/open-nodes-browser-modal}.
