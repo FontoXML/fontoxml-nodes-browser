@@ -20,6 +20,7 @@ import getMarkupLabel from 'fontoxml-markup-documentation/getMarkupLabel';
 import getTitleContent from 'fontoxml-markup-documentation/getTitleContent';
 import getNodeId from 'fontoxml-dom-identification/getNodeId';
 import FxNodePreview from 'fontoxml-fx/FxNodePreview.jsx';
+import operationsManager from 'fontoxml-operations/operationsManager';
 import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
 import t from 'fontoxml-localization/t';
 
@@ -70,6 +71,7 @@ class NodesBrowserModal extends Component {
 		cancelModal: PropTypes.func.isRequired,
 		data: PropTypes.shape({
 			documentId: PropTypes.string,
+			insertOperationName: PropTypes.string,
 			linkableElementsQuery: PropTypes.string.isRequired,
 			modalIcon: PropTypes.string,
 			modalPrimaryButtonLabel: PropTypes.string.isRequired,
@@ -80,11 +82,17 @@ class NodesBrowserModal extends Component {
 	};
 
 	initialNodes = createViewModelsForNodes(this.props.data.linkableElementsQuery);
+	initialSelectedNode = this.initialNodes.find(node => node.nodeId === this.props.data.nodeId) ||
+		null;
+	isMountedInDOM = false;
 
 	state = {
 		displayedNodes: this.initialNodes,
+		isSubmitButtonDisabled:
+			(this.initialSelectedNode && !!this.props.data.insertOperationName) ||
+			!this.initialSelectedNode,
 		searchInput: '',
-		selectedNode: this.initialNodes.find(node => node.nodeId === this.props.data.nodeId) || null
+		selectedNode: this.initialSelectedNode
 	};
 
 	filterInitialNodes = searchInput =>
@@ -101,29 +109,83 @@ class NodesBrowserModal extends Component {
 				searchInput === '' ? this.initialNodes : this.filterInitialNodes(searchInput)
 		});
 
-	handleNodeListItemClick = selectedNode => this.setState({ selectedNode });
+	determineSubmitButtonState = selectedNode => {
+		const { insertOperationName } = this.props.data;
+
+		if (selectedNode && insertOperationName) {
+			const initialData = {
+				...this.props.data,
+				nodeId: selectedNode.nodeId,
+				documentId: selectedNode.documentId
+			};
+
+			operationsManager
+				.getOperationState(insertOperationName, initialData)
+				.then(
+					operationState =>
+						this.isMountedInDOM &&
+						this.setState({ isSubmitButtonDisabled: !operationState.enabled })
+				)
+				.catch(_ => this.isMountedInDOM && this.setState({ isSubmitButtonDisabled: true }));
+		}
+	};
+
+	handleNodeListItemClick = selectedNode => {
+		this.setState({
+			selectedNode,
+			isSubmitButtonDisabled:
+				(selectedNode && !!this.props.data.insertOperationName) || !selectedNode
+		});
+
+		this.determineSubmitButtonState(selectedNode);
+	};
 
 	handleSubmit = node =>
 		this.props.submitModal({ nodeId: node.nodeId, documentId: node.documentId });
 
 	handleKeyDown = event => {
-		const { selectedNode } = this.state;
 		switch (event.key) {
 			case 'Escape':
 				this.props.cancelModal();
 				break;
 			case 'Enter':
-				if (selectedNode) {
-					this.handleSubmit(selectedNode);
+				if (!this.state.isSubmitButtonDisabled) {
+					this.handleSubmit(this.state.selectedNode);
 				}
 				break;
+		}
+	};
+
+	handleItemDoubleClick = selectedNode => {
+		const { insertOperationName } = this.props.data;
+
+		if (insertOperationName) {
+			const initialData = {
+				...this.props.data,
+				nodeId: selectedNode.nodeId,
+				documentId: selectedNode.documentId
+			};
+
+			operationsManager
+				.getOperationState(insertOperationName, initialData)
+				.then(
+					operationState =>
+						this.isMountedInDOM &&
+						operationState.enabled &&
+						this.handleSubmit(selectedNode)
+				)
+				.catch(_error => {
+					return;
+				});
+		} else {
+			this.handleSubmit(selectedNode);
 		}
 	};
 
 	handleSubmitButtonClick = () => this.handleSubmit(this.state.selectedNode);
 
 	render() {
-		const { displayedNodes, searchInput, selectedNode } = this.state;
+		const { displayedNodes, isSubmitButtonDisabled, searchInput, selectedNode } = this.state;
 		const {
 			cancelModal,
 			data: { modalIcon, modalPrimaryButtonLabel, modalTitle }
@@ -149,7 +211,7 @@ class NodesBrowserModal extends Component {
 								<NodesList
 									nodes={displayedNodes}
 									onItemClick={this.handleNodeListItemClick}
-									onItemDoubleClick={this.handleSubmit}
+									onItemDoubleClick={this.handleItemDoubleClick}
 									searchInput={searchInput}
 									selectedNode={selectedNode}
 								/>
@@ -173,12 +235,22 @@ class NodesBrowserModal extends Component {
 					<Button
 						type="primary"
 						label={modalPrimaryButtonLabel}
-						isDisabled={!selectedNode}
+						isDisabled={isSubmitButtonDisabled}
 						onClick={this.handleSubmitButtonClick}
 					/>
 				</ModalFooter>
 			</Modal>
 		);
+	}
+
+	componentDidMount() {
+		this.isMountedInDOM = true;
+
+		this.determineSubmitButtonState(this.state.selectedNode);
+	}
+
+	componentWillUnmount() {
+		this.isMountedInDOM = false;
 	}
 }
 
