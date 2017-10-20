@@ -2,6 +2,7 @@
 	"open-nodes-browser-modal": {
 		"__documentation": {
 			"fontosdk": true,
+			"category": "add-on/fontoxml-nodes-browser",
 			"summary": "Opens the nodes browser in which the user can select a node.",
 			"params": [
 				{
