@@ -85,6 +85,7 @@ class NodesBrowserModal extends Component {
 	initialSelectedNode = this.initialNodes.find(node => node.nodeId === this.props.data.nodeId) ||
 		null;
 	isMountedInDOM = false;
+	searchInputRef = null;
 
 	state = {
 		displayedNodes: this.initialNodes,
@@ -108,6 +109,8 @@ class NodesBrowserModal extends Component {
 			displayedNodes:
 				searchInput === '' ? this.initialNodes : this.filterInitialNodes(searchInput)
 		});
+
+	handleSearchInputRef = searchInputRef => (this.searchInputRef = searchInputRef);
 
 	determineSubmitButtonState = selectedNode => {
 		const { insertOperationName } = this.props.data;
@@ -201,6 +204,7 @@ class NodesBrowserModal extends Component {
 							<Flex applyCss={searchInputContainerStyles}>
 								<SearchInput
 									onChange={this.handleSearchInputChange}
+									ref={this.handleSearchInputRef}
 									value={searchInput}
 								/>
 							</Flex>
@@ -245,6 +249,8 @@ class NodesBrowserModal extends Component {
 
 	componentDidMount() {
 		this.isMountedInDOM = true;
+
+		this.searchInputRef.focus();
 
 		this.determineSubmitButtonState(this.state.selectedNode);
 	}
