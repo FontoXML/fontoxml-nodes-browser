@@ -1,6 +1,8 @@
+---
 category: add-on/fontoxml-nodes-browser
+---
 
-# Add-on nodes browser (fontoxml-nodes-browser)
+# Nodes browser library
 
 This add-on exposes the {@link operation/open-nodes-browser-modal} operation for opening a nodes browser. This browser allows the user to choose between specified element nodes from the documents currently opened in the editor. This, for example, can be used while selecting a target for a link.
 
