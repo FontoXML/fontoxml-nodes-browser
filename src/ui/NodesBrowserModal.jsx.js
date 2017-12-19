@@ -12,12 +12,10 @@ import {
 	ModalHeader,
 	SearchInput
 } from 'fds/components';
-import caseConverter from 'fontoxml-utils/caseConverter';
 import documentsManager from 'fontoxml-documents/documentsManager';
 import domQuery from 'fontoxml-dom-utils/domQuery';
 import evaluateXPathToNodes from 'fontoxml-selectors/evaluateXPathToNodes';
-import getMarkupLabel from 'fontoxml-markup-documentation/getMarkupLabel';
-import getTitleContent from 'fontoxml-markup-documentation/getTitleContent';
+import evaluateXPathToString from 'fontoxml-selectors/evaluateXPathToString';
 import getNodeId from 'fontoxml-dom-identification/getNodeId';
 import FxNodePreview from 'fontoxml-fx/FxNodePreview.jsx';
 import operationsManager from 'fontoxml-operations/operationsManager';
@@ -25,6 +23,11 @@ import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
 import t from 'fontoxml-localization/t';
 
 import NodesList from './NodesList.jsx';
+
+function upperCaseFirstLetter(input) {
+	const firstCharacter = String.fromCodePoint(input.codePointAt(0));
+	return firstCharacter.toUpperCase() + input.substr(firstCharacter.length);
+}
 
 const createViewModelsForNodes = linkableElementsQuery =>
 	documentsManager
@@ -43,18 +46,23 @@ const createViewModelsForNodes = linkableElementsQuery =>
 					// Used for searches
 					const searchLabel = domQuery.getTextContent(node);
 
-					let shortLabel = getTitleContent(node) || searchLabel;
+					let shortLabel =
+						evaluateXPathToString('fonto:title-content(.)', node, readOnlyBlueprint) ||
+						searchLabel;
 					if (shortLabel === '') {
 						shortLabel = t('(Empty element)');
 					}
 
 					const nodeId = getNodeId(node);
 
+					const markupLabel = upperCaseFirstLetter(
+						evaluateXPathToString('fonto:markup-label(.)', node, readOnlyBlueprint) ||
+							node.nodeName
+					);
+
 					return {
 						documentId,
-						markupLabel: caseConverter.uppercaseFirstLetter(
-							getMarkupLabel(node) || node.nodeName
-						),
+						markupLabel,
 						nodeId: nodeId,
 						searchLabel,
 						shortLabel,
