@@ -4,10 +4,10 @@ import { Flex, Label, ListItem, StateMessage, Text, VirtualList } from 'fds/comp
 import t from 'fontoxml-localization/t';
 
 class NodesList extends PureComponent {
-	handleRenderItem = ({ key, item, isSelected, onClick, onDoubleClick, onRef }) => (
+	handleRenderItem = ({ key, item, onClick, onDoubleClick, onRef }) => (
 		<ListItem
 			key={key}
-			isSelected={isSelected}
+			isSelected={item === this.props.selectedNode}
 			onClick={onClick}
 			onDoubleClick={onDoubleClick}
 			onRef={onRef}
@@ -41,6 +41,7 @@ class NodesList extends PureComponent {
 
 	render() {
 		const { nodes, onItemClick, onItemDoubleClick, searchInput, selectedNode } = this.props;
+
 		return (
 			<Flex flex="1" flexDirection="column">
 				{nodes.length !== 0 && (
@@ -50,29 +51,29 @@ class NodesList extends PureComponent {
 				)}
 
 				{nodes.length === 0 &&
-				searchInput !== '' && (
-					<StateMessage
-						paddingSize="l"
-						visual="meh-o"
-						title={t("We can't find that.")}
-						message={t(
-							'We can’t find any items with “{SEARCH_INPUT_VALUE}” in their content or name. Please try something else.',
-							{ SEARCH_INPUT_VALUE: searchInput }
-						)}
-					/>
-				)}
+					searchInput !== '' && (
+						<StateMessage
+							paddingSize="l"
+							visual="meh-o"
+							title={t("We can't find that.")}
+							message={t(
+								'We can’t find any items with “{SEARCH_INPUT_VALUE}” in their content or name. Please try something else.',
+								{ SEARCH_INPUT_VALUE: searchInput }
+							)}
+						/>
+					)}
 
 				{nodes.length === 0 &&
-				searchInput === '' && (
-					<StateMessage
-						paddingSize="l"
-						visual="meh-o"
-						title={t('No items found.')}
-						message={t(
-							'We couldn\'t find any items in the document. Please click on "Cancel" and create an item first.'
-						)}
-					/>
-				)}
+					searchInput === '' && (
+						<StateMessage
+							paddingSize="l"
+							visual="meh-o"
+							title={t('No items found.')}
+							message={t(
+								'We couldn\'t find any items in the document. Please click on "Cancel" and create an item first.'
+							)}
+						/>
+					)}
 
 				{nodes.length !== 0 && (
 					<VirtualList
@@ -82,7 +83,7 @@ class NodesList extends PureComponent {
 						onItemDoubleClick={onItemDoubleClick}
 						paddingSize="s"
 						renderItem={this.handleRenderItem}
-						selectedItems={selectedNode ? [selectedNode] : []}
+						idToScrollIntoView={selectedNode ? selectedNode.id : null}
 					/>
 				)}
 			</Flex>
