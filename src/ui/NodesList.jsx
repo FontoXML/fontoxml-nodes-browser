@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 
 import { Flex, Label, ListItem, StateMessage, Text, VirtualList } from 'fds/components';
-import t from 'fontoxml-localization/t';
+import t from 'fontoxml-localization/src/t.js';
 
 class NodesList extends PureComponent {
 	handleRenderItem = ({ key, item, onClick, onDoubleClick, onRef }) => (
@@ -50,30 +50,28 @@ class NodesList extends PureComponent {
 					</Flex>
 				)}
 
-				{nodes.length === 0 &&
-					searchInput !== '' && (
-						<StateMessage
-							paddingSize="l"
-							visual="meh-o"
-							title={t("We can't find that.")}
-							message={t(
-								'We can’t find any items with “{SEARCH_INPUT_VALUE}” in their content or name. Please try something else.',
-								{ SEARCH_INPUT_VALUE: searchInput }
-							)}
-						/>
-					)}
+				{nodes.length === 0 && searchInput !== '' && (
+					<StateMessage
+						paddingSize="l"
+						visual="meh-o"
+						title={t("We can't find that.")}
+						message={t(
+							'We can’t find any items with “{SEARCH_INPUT_VALUE}” in their content or name. Please try something else.',
+							{ SEARCH_INPUT_VALUE: searchInput }
+						)}
+					/>
+				)}
 
-				{nodes.length === 0 &&
-					searchInput === '' && (
-						<StateMessage
-							paddingSize="l"
-							visual="meh-o"
-							title={t('No items found.')}
-							message={t(
-								'We couldn\'t find any items in the document. Please click on "Cancel" and create an item first.'
-							)}
-						/>
-					)}
+				{nodes.length === 0 && searchInput === '' && (
+					<StateMessage
+						paddingSize="l"
+						visual="meh-o"
+						title={t('No items found.')}
+						message={t(
+							'We couldn\'t find any items in the document. Please click on "Cancel" and create an item first.'
+						)}
+					/>
+				)}
 
 				{nodes.length !== 0 && (
 					<VirtualList

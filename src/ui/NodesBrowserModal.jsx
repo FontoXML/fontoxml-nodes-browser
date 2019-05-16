@@ -12,15 +12,15 @@ import {
 	ModalHeader,
 	SearchInput
 } from 'fds/components';
-import documentsManager from 'fontoxml-documents/documentsManager';
-import domQuery from 'fontoxml-dom-utils/domQuery';
-import evaluateXPathToNodes from 'fontoxml-selectors/evaluateXPathToNodes';
-import evaluateXPathToString from 'fontoxml-selectors/evaluateXPathToString';
-import getNodeId from 'fontoxml-dom-identification/getNodeId';
-import FxNodePreview from 'fontoxml-fx/FxNodePreview.jsx';
-import operationsManager from 'fontoxml-operations/operationsManager';
-import readOnlyBlueprint from 'fontoxml-blueprints/readOnlyBlueprint';
-import t from 'fontoxml-localization/t';
+import documentsManager from 'fontoxml-documents/src/documentsManager.js';
+import domQuery from 'fontoxml-dom-utils/src/domQuery.js';
+import evaluateXPathToNodes from 'fontoxml-selectors/src/evaluateXPathToNodes.js';
+import evaluateXPathToString from 'fontoxml-selectors/src/evaluateXPathToString.js';
+import getNodeId from 'fontoxml-dom-identification/src/getNodeId.js';
+import FxNodePreview from 'fontoxml-fx/src/FxNodePreview.jsx';
+import operationsManager from 'fontoxml-operations/src/operationsManager.js';
+import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint.js';
+import t from 'fontoxml-localization/src/t.js';
 
 import NodesList from './NodesList.jsx';
 
@@ -90,8 +90,8 @@ class NodesBrowserModal extends Component {
 	};
 
 	initialNodes = createViewModelsForNodes(this.props.data.linkableElementsQuery);
-	initialSelectedNode = this.initialNodes.find(node => node.nodeId === this.props.data.nodeId) ||
-		null;
+	initialSelectedNode =
+		this.initialNodes.find(node => node.nodeId === this.props.data.nodeId) || null;
 	isMountedInDOM = false;
 	searchInputRef = null;
 
