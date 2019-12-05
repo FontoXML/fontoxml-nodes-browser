@@ -203,7 +203,7 @@ class NodesBrowserModal extends Component {
 		} = this.props;
 
 		return (
-			<Modal size="m" onKeyDown={this.handleKeyDown}>
+			<Modal size="l" onKeyDown={this.handleKeyDown}>
 				<ModalHeader icon={modalIcon} title={modalTitle} />
 
 				<ModalBody>
@@ -219,7 +219,7 @@ class NodesBrowserModal extends Component {
 						</ModalContentToolbar>
 
 						<ModalContent>
-							<ModalContent>
+							<ModalContent flex="1">
 								<NodesList
 									nodes={displayedNodes}
 									onItemClick={this.handleNodeListItemClick}
@@ -230,7 +230,7 @@ class NodesBrowserModal extends Component {
 							</ModalContent>
 
 							{selectedNode && (
-								<ModalContent flexDirection="column" isScrollContainer>
+								<ModalContent flexDirection="column" flex="2" isScrollContainer>
 									<FxNodePreview
 										documentId={selectedNode.documentId}
 										traversalRootNodeId={selectedNode.nodeId}
