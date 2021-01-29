@@ -27,3 +27,13 @@ The following properties can be used with this operation:
 * The modal icon, title and primary button label can be set with the `modalIcon`, `modalTitle` and `modalPrimaryButtonLabel` respectively.
 
 For more information see {@link operation/open-nodes-browser-modal}.
+
+# Contributing
+
+This package can serve as a base for custom versions of the nodes browser. It can be forked by
+checking it out directly in the `packages` folder of an editor. When making a fork, consider keeping
+it up-to-date with new Fonto Editor versions when they release.
+
+We highly appreciate pull requests if you find a bug. For more general improvements or new features,
+please file a [support.fontoxml.com](support request). That way, we can think along and make sure an
+improvement is made in a way that benefits all users of this package.
