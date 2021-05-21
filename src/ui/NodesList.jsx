@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 
-import { Flex, Label, ListItem, StateMessage, Text, VirtualList } from 'fds/components';
+import { Block, Flex, Label, ListItem, StateMessage, Text, VirtualList } from 'fds/components';
 import t from 'fontoxml-localization/src/t.js';
 
 class NodesList extends PureComponent {
@@ -43,7 +43,7 @@ class NodesList extends PureComponent {
 		const { nodes, onItemClick, onItemDoubleClick, searchInput, selectedNode } = this.props;
 
 		return (
-			<Flex flex="1" flexDirection="column">
+			<Block flex="1" isScrollContainer>
 				{nodes.length !== 0 && (
 					<Flex justifyContent="center" paddingSize="m">
 						{this.renderResultsCounter(nodes.length, searchInput)}
@@ -84,7 +84,7 @@ class NodesList extends PureComponent {
 						idToScrollIntoView={selectedNode ? selectedNode.id : null}
 					/>
 				)}
-			</Flex>
+			</Block>
 		);
 	}
 }
