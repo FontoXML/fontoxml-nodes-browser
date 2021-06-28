@@ -1,5 +1,3 @@
-import React, { PureComponent } from 'react';
-
 import {
 	Block,
 	Flex,
@@ -9,6 +7,8 @@ import {
 	Text,
 	VirtualList,
 } from 'fds/components';
+import React, { PureComponent } from 'react';
+
 import t from 'fontoxml-localization/src/t';
 
 class NodesList extends PureComponent {

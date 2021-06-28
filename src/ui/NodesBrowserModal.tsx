@@ -1,6 +1,3 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-
 import {
 	Button,
 	Flex,
@@ -12,15 +9,18 @@ import {
 	ModalHeader,
 	SearchInput,
 } from 'fds/components';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+
+import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
 import documentsManager from 'fontoxml-documents/src/documentsManager';
+import getNodeId from 'fontoxml-dom-identification/src/getNodeId';
 import domQuery from 'fontoxml-dom-utils/src/domQuery';
+import FxNodePreview from 'fontoxml-fx/src/FxNodePreview';
+import t from 'fontoxml-localization/src/t';
+import operationsManager from 'fontoxml-operations/src/operationsManager';
 import evaluateXPathToNodes from 'fontoxml-selectors/src/evaluateXPathToNodes';
 import evaluateXPathToString from 'fontoxml-selectors/src/evaluateXPathToString';
-import getNodeId from 'fontoxml-dom-identification/src/getNodeId';
-import FxNodePreview from 'fontoxml-fx/src/FxNodePreview';
-import operationsManager from 'fontoxml-operations/src/operationsManager';
-import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
-import t from 'fontoxml-localization/src/t';
 
 import NodesList from './NodesList';
 
@@ -69,7 +69,7 @@ const createViewModelsForNodes = (linkableElementsQuery) =>
 					return {
 						documentId,
 						markupLabel,
-						nodeId: nodeId,
+						nodeId,
 						searchLabel,
 						shortLabel,
 						id: nodeId,
@@ -98,11 +98,14 @@ class NodesBrowserModal extends Component {
 	initialNodes = createViewModelsForNodes(
 		this.props.data.linkableElementsQuery
 	);
+
 	initialSelectedNode =
 		this.initialNodes.find(
 			(node) => node.nodeId === this.props.data.nodeId
 		) || null;
+
 	isMountedInDOM = false;
+
 	searchInputRef = null;
 
 	state = {
@@ -126,7 +129,7 @@ class NodesBrowserModal extends Component {
 					.includes(searchInput.toLowerCase())
 		);
 
-	handleSearchInputChange = (searchInput) =>
+	handleSearchInputChange = (searchInput) => {
 		this.setState({
 			searchInput,
 			displayedNodes:
@@ -134,6 +137,7 @@ class NodesBrowserModal extends Component {
 					? this.initialNodes
 					: this.filterInitialNodes(searchInput),
 		});
+	};
 
 	handleSearchInputRef = (searchInputRef) =>
 		(this.searchInputRef = searchInputRef);
@@ -150,18 +154,16 @@ class NodesBrowserModal extends Component {
 
 			operationsManager
 				.getOperationState(insertOperationName, initialData)
-				.then(
-					(operationState) =>
-						this.isMountedInDOM &&
+				.then((operationState) => {
+					this.isMountedInDOM &&
 						this.setState({
 							isSubmitButtonDisabled: !operationState.enabled,
-						})
-				)
-				.catch(
-					(_) =>
-						this.isMountedInDOM &&
-						this.setState({ isSubmitButtonDisabled: true })
-				);
+						});
+				})
+				.catch((_) => {
+					this.isMountedInDOM &&
+						this.setState({ isSubmitButtonDisabled: true });
+				});
 		}
 	};
 
@@ -213,9 +215,7 @@ class NodesBrowserModal extends Component {
 						operationState.enabled &&
 						this.handleSubmit(selectedNode)
 				)
-				.catch((_error) => {
-					return;
-				});
+				.catch((_error) => {});
 		} else {
 			this.handleSubmit(selectedNode);
 		}
