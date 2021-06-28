@@ -43,7 +43,8 @@
 					"type": "string",
 					"description": [
 						"(Optional) The label for the button in the bottom right corner, when clicking this button ",
-						"the selected node will be submitted. The default value for this label is 't__Insert'."				]
+						"the selected node will be submitted. The default value for this label is 't__Insert'."
+					]
 				},
 				{
 					"name": "modalTitle",
@@ -80,8 +81,7 @@
 			"modalPrimaryButtonLabel": "t__Insert",
 			"modalTitle": "t__Select an element"
 		},
-		"steps":
-		{
+		"steps": {
 			"type": "modal/NodesBrowserModal"
 		}
 	}
