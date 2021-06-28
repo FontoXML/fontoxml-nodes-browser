@@ -1,7 +1,15 @@
 import React, { PureComponent } from 'react';
 
-import { Block, Flex, Label, ListItem, StateMessage, Text, VirtualList } from 'fds/components';
-import t from 'fontoxml-localization/src/t.js';
+import {
+	Block,
+	Flex,
+	Label,
+	ListItem,
+	StateMessage,
+	Text,
+	VirtualList,
+} from 'fds/components';
+import t from 'fontoxml-localization/src/t';
 
 class NodesList extends PureComponent {
 	handleRenderItem = ({ key, item, onClick, onDoubleClick, onRef }) => (
@@ -26,7 +34,7 @@ class NodesList extends PureComponent {
 				<Label align="center" colorName="text-muted-color">
 					{t('{NODES_LENGTH} results for “{SEARCH_INPUT}”', {
 						NODES_LENGTH: nodesLength,
-						SEARCH_INPUT: searchInput
+						SEARCH_INPUT: searchInput,
 					})}
 				</Label>
 			);
@@ -40,7 +48,13 @@ class NodesList extends PureComponent {
 	}
 
 	render() {
-		const { nodes, onItemClick, onItemDoubleClick, searchInput, selectedNode } = this.props;
+		const {
+			nodes,
+			onItemClick,
+			onItemDoubleClick,
+			searchInput,
+			selectedNode,
+		} = this.props;
 
 		return (
 			<Block flex="1" isScrollContainer>
@@ -81,7 +95,9 @@ class NodesList extends PureComponent {
 						onItemDoubleClick={onItemDoubleClick}
 						paddingSize="s"
 						renderItem={this.handleRenderItem}
-						idToScrollIntoView={selectedNode ? selectedNode.id : null}
+						idToScrollIntoView={
+							selectedNode ? selectedNode.id : null
+						}
 					/>
 				)}
 			</Block>

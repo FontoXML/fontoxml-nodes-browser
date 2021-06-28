@@ -10,26 +10,26 @@ import {
 	ModalContentToolbar,
 	ModalFooter,
 	ModalHeader,
-	SearchInput
+	SearchInput,
 } from 'fds/components';
-import documentsManager from 'fontoxml-documents/src/documentsManager.js';
-import domQuery from 'fontoxml-dom-utils/src/domQuery.js';
-import evaluateXPathToNodes from 'fontoxml-selectors/src/evaluateXPathToNodes.js';
-import evaluateXPathToString from 'fontoxml-selectors/src/evaluateXPathToString.js';
-import getNodeId from 'fontoxml-dom-identification/src/getNodeId.js';
-import FxNodePreview from 'fontoxml-fx/src/FxNodePreview.jsx';
-import operationsManager from 'fontoxml-operations/src/operationsManager.js';
-import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint.js';
-import t from 'fontoxml-localization/src/t.js';
+import documentsManager from 'fontoxml-documents/src/documentsManager';
+import domQuery from 'fontoxml-dom-utils/src/domQuery';
+import evaluateXPathToNodes from 'fontoxml-selectors/src/evaluateXPathToNodes';
+import evaluateXPathToString from 'fontoxml-selectors/src/evaluateXPathToString';
+import getNodeId from 'fontoxml-dom-identification/src/getNodeId';
+import FxNodePreview from 'fontoxml-fx/src/FxNodePreview';
+import operationsManager from 'fontoxml-operations/src/operationsManager';
+import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
+import t from 'fontoxml-localization/src/t';
 
-import NodesList from './NodesList.jsx';
+import NodesList from './NodesList';
 
 function upperCaseFirstLetter(input) {
 	const firstCharacter = String.fromCodePoint(input.codePointAt(0));
 	return firstCharacter.toUpperCase() + input.substr(firstCharacter.length);
 }
 
-const createViewModelsForNodes = linkableElementsQuery =>
+const createViewModelsForNodes = (linkableElementsQuery) =>
 	documentsManager
 		.getAllDocumentIds({ 'cap/operable': true })
 		.reduce((displayedNodes, documentId) => {
@@ -42,13 +42,16 @@ const createViewModelsForNodes = linkableElementsQuery =>
 			);
 
 			return displayedNodes.concat(
-				nodes.map(node => {
+				nodes.map((node) => {
 					// Used for searches
 					const searchLabel = domQuery.getTextContent(node);
 
 					let shortLabel =
-						evaluateXPathToString('fonto:title-content(.)', node, readOnlyBlueprint) ||
-						searchLabel;
+						evaluateXPathToString(
+							'fonto:title-content(.)',
+							node,
+							readOnlyBlueprint
+						) || searchLabel;
 					if (shortLabel === '') {
 						shortLabel = t('(Empty element)');
 					}
@@ -56,8 +59,11 @@ const createViewModelsForNodes = linkableElementsQuery =>
 					const nodeId = getNodeId(node);
 
 					const markupLabel = upperCaseFirstLetter(
-						evaluateXPathToString('fonto:markup-label(.)', node, readOnlyBlueprint) ||
-							node.nodeName
+						evaluateXPathToString(
+							'fonto:markup-label(.)',
+							node,
+							readOnlyBlueprint
+						) || node.nodeName
 					);
 
 					return {
@@ -66,7 +72,7 @@ const createViewModelsForNodes = linkableElementsQuery =>
 						nodeId: nodeId,
 						searchLabel,
 						shortLabel,
-						id: nodeId
+						id: nodeId,
 					};
 				})
 			);
@@ -84,77 +90,99 @@ class NodesBrowserModal extends Component {
 			modalIcon: PropTypes.string,
 			modalPrimaryButtonLabel: PropTypes.string.isRequired,
 			modalTitle: PropTypes.string.isRequired,
-			nodeId: PropTypes.string
+			nodeId: PropTypes.string,
 		}),
-		submitModal: PropTypes.func.isRequired
+		submitModal: PropTypes.func.isRequired,
 	};
 
-	initialNodes = createViewModelsForNodes(this.props.data.linkableElementsQuery);
+	initialNodes = createViewModelsForNodes(
+		this.props.data.linkableElementsQuery
+	);
 	initialSelectedNode =
-		this.initialNodes.find(node => node.nodeId === this.props.data.nodeId) || null;
+		this.initialNodes.find(
+			(node) => node.nodeId === this.props.data.nodeId
+		) || null;
 	isMountedInDOM = false;
 	searchInputRef = null;
 
 	state = {
 		displayedNodes: this.initialNodes,
 		isSubmitButtonDisabled:
-			(this.initialSelectedNode && !!this.props.data.insertOperationName) ||
+			(this.initialSelectedNode &&
+				!!this.props.data.insertOperationName) ||
 			!this.initialSelectedNode,
 		searchInput: '',
-		selectedNode: this.initialSelectedNode
+		selectedNode: this.initialSelectedNode,
 	};
 
-	filterInitialNodes = searchInput =>
+	filterInitialNodes = (searchInput) =>
 		this.initialNodes.filter(
-			node =>
-				node.markupLabel.toLowerCase().includes(searchInput.toLowerCase()) ||
-				node.searchLabel.toLowerCase().includes(searchInput.toLowerCase())
+			(node) =>
+				node.markupLabel
+					.toLowerCase()
+					.includes(searchInput.toLowerCase()) ||
+				node.searchLabel
+					.toLowerCase()
+					.includes(searchInput.toLowerCase())
 		);
 
-	handleSearchInputChange = searchInput =>
+	handleSearchInputChange = (searchInput) =>
 		this.setState({
 			searchInput,
 			displayedNodes:
-				searchInput === '' ? this.initialNodes : this.filterInitialNodes(searchInput)
+				searchInput === ''
+					? this.initialNodes
+					: this.filterInitialNodes(searchInput),
 		});
 
-	handleSearchInputRef = searchInputRef => (this.searchInputRef = searchInputRef);
+	handleSearchInputRef = (searchInputRef) =>
+		(this.searchInputRef = searchInputRef);
 
-	determineSubmitButtonState = selectedNode => {
+	determineSubmitButtonState = (selectedNode) => {
 		const { insertOperationName } = this.props.data;
 
 		if (selectedNode && insertOperationName) {
 			const initialData = {
 				...this.props.data,
 				nodeId: selectedNode.nodeId,
-				documentId: selectedNode.documentId
+				documentId: selectedNode.documentId,
 			};
 
 			operationsManager
 				.getOperationState(insertOperationName, initialData)
 				.then(
-					operationState =>
+					(operationState) =>
 						this.isMountedInDOM &&
-						this.setState({ isSubmitButtonDisabled: !operationState.enabled })
+						this.setState({
+							isSubmitButtonDisabled: !operationState.enabled,
+						})
 				)
-				.catch(_ => this.isMountedInDOM && this.setState({ isSubmitButtonDisabled: true }));
+				.catch(
+					(_) =>
+						this.isMountedInDOM &&
+						this.setState({ isSubmitButtonDisabled: true })
+				);
 		}
 	};
 
-	handleNodeListItemClick = selectedNode => {
+	handleNodeListItemClick = (selectedNode) => {
 		this.setState({
 			selectedNode,
 			isSubmitButtonDisabled:
-				(selectedNode && !!this.props.data.insertOperationName) || !selectedNode
+				(selectedNode && !!this.props.data.insertOperationName) ||
+				!selectedNode,
 		});
 
 		this.determineSubmitButtonState(selectedNode);
 	};
 
-	handleSubmit = node =>
-		this.props.submitModal({ nodeId: node.nodeId, documentId: node.documentId });
+	handleSubmit = (node) =>
+		this.props.submitModal({
+			nodeId: node.nodeId,
+			documentId: node.documentId,
+		});
 
-	handleKeyDown = event => {
+	handleKeyDown = (event) => {
 		switch (event.key) {
 			case 'Escape':
 				this.props.cancelModal();
@@ -167,25 +195,25 @@ class NodesBrowserModal extends Component {
 		}
 	};
 
-	handleItemDoubleClick = selectedNode => {
+	handleItemDoubleClick = (selectedNode) => {
 		const { insertOperationName } = this.props.data;
 
 		if (insertOperationName) {
 			const initialData = {
 				...this.props.data,
 				nodeId: selectedNode.nodeId,
-				documentId: selectedNode.documentId
+				documentId: selectedNode.documentId,
 			};
 
 			operationsManager
 				.getOperationState(insertOperationName, initialData)
 				.then(
-					operationState =>
+					(operationState) =>
 						this.isMountedInDOM &&
 						operationState.enabled &&
 						this.handleSubmit(selectedNode)
 				)
-				.catch(_error => {
+				.catch((_error) => {
 					return;
 				});
 		} else {
@@ -196,10 +224,15 @@ class NodesBrowserModal extends Component {
 	handleSubmitButtonClick = () => this.handleSubmit(this.state.selectedNode);
 
 	render() {
-		const { displayedNodes, isSubmitButtonDisabled, searchInput, selectedNode } = this.state;
+		const {
+			displayedNodes,
+			isSubmitButtonDisabled,
+			searchInput,
+			selectedNode,
+		} = this.state;
 		const {
 			cancelModal,
-			data: { modalIcon, modalPrimaryButtonLabel, modalTitle }
+			data: { modalIcon, modalPrimaryButtonLabel, modalTitle },
 		} = this.props;
 
 		return (
@@ -223,17 +256,25 @@ class NodesBrowserModal extends Component {
 								<NodesList
 									nodes={displayedNodes}
 									onItemClick={this.handleNodeListItemClick}
-									onItemDoubleClick={this.handleItemDoubleClick}
+									onItemDoubleClick={
+										this.handleItemDoubleClick
+									}
 									searchInput={searchInput}
 									selectedNode={selectedNode}
 								/>
 							</ModalContent>
 
 							{selectedNode && (
-								<ModalContent flexDirection="column" flex="2" isScrollContainer>
+								<ModalContent
+									flexDirection="column"
+									flex="2"
+									isScrollContainer
+								>
 									<FxNodePreview
 										documentId={selectedNode.documentId}
-										traversalRootNodeId={selectedNode.nodeId}
+										traversalRootNodeId={
+											selectedNode.nodeId
+										}
 									/>
 								</ModalContent>
 							)}
