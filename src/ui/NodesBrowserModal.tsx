@@ -9,7 +9,6 @@ import {
 	ModalHeader,
 	SearchInput,
 } from 'fds/components';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
 import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
@@ -80,21 +79,21 @@ const createViewModelsForNodes = (linkableElementsQuery) =>
 
 const searchInputContainerStyles = { maxWidth: '20rem', width: '100%' };
 
-class NodesBrowserModal extends Component {
-	static propTypes = {
-		cancelModal: PropTypes.func.isRequired,
-		data: PropTypes.shape({
-			documentId: PropTypes.string,
-			insertOperationName: PropTypes.string,
-			linkableElementsQuery: PropTypes.string.isRequired,
-			modalIcon: PropTypes.string,
-			modalPrimaryButtonLabel: PropTypes.string.isRequired,
-			modalTitle: PropTypes.string.isRequired,
-			nodeId: PropTypes.string,
-		}),
-		submitModal: PropTypes.func.isRequired,
+type Props = {
+	cancelModal(...args: unknown[]): unknown;
+	data?: {
+		documentId?: string;
+		insertOperationName?: string;
+		linkableElementsQuery: string;
+		modalIcon?: string;
+		modalPrimaryButtonLabel: string;
+		modalTitle: string;
+		nodeId?: string;
 	};
+	submitModal(...args: unknown[]): unknown;
+};
 
+class NodesBrowserModal extends Component<Props> {
 	initialNodes = createViewModelsForNodes(
 		this.props.data.linkableElementsQuery
 	);
