@@ -16,6 +16,7 @@ import documentsManager from 'fontoxml-documents/src/documentsManager';
 import getNodeId from 'fontoxml-dom-identification/src/getNodeId';
 import domQuery from 'fontoxml-dom-utils/src/domQuery';
 import FxNodePreview from 'fontoxml-fx/src/FxNodePreview';
+import type { ModalProps } from 'fontoxml-fx/src/types';
 import t from 'fontoxml-localization/src/t';
 import operationsManager from 'fontoxml-operations/src/operationsManager';
 import evaluateXPathToNodes from 'fontoxml-selectors/src/evaluateXPathToNodes';
@@ -79,9 +80,8 @@ const createViewModelsForNodes = (linkableElementsQuery) =>
 
 const searchInputContainerStyles = { maxWidth: '20rem', width: '100%' };
 
-type Props = {
-	cancelModal(...args: unknown[]): unknown;
-	data?: {
+class NodesBrowserModal extends Component<
+	ModalProps<{
 		documentId?: string;
 		insertOperationName?: string;
 		linkableElementsQuery: string;
@@ -89,11 +89,8 @@ type Props = {
 		modalPrimaryButtonLabel: string;
 		modalTitle: string;
 		nodeId?: string;
-	};
-	submitModal(...args: unknown[]): unknown;
-};
-
-class NodesBrowserModal extends Component<Props> {
+	}>
+> {
 	initialNodes = createViewModelsForNodes(
 		this.props.data.linkableElementsQuery
 	);
@@ -177,11 +174,12 @@ class NodesBrowserModal extends Component<Props> {
 		this.determineSubmitButtonState(selectedNode);
 	};
 
-	handleSubmit = (node) =>
+	handleSubmit = (node) => {
 		this.props.submitModal({
 			nodeId: node.nodeId,
 			documentId: node.documentId,
 		});
+	};
 
 	handleKeyDown = (event) => {
 		switch (event.key) {
@@ -208,19 +206,20 @@ class NodesBrowserModal extends Component<Props> {
 
 			operationsManager
 				.getOperationState(insertOperationName, initialData)
-				.then(
-					(operationState) =>
-						this.isMountedInDOM &&
+				.then((operationState) => {
+					this.isMountedInDOM &&
 						operationState.enabled &&
-						this.handleSubmit(selectedNode)
-				)
+						this.handleSubmit(selectedNode);
+				})
 				.catch((_error) => {});
 		} else {
 			this.handleSubmit(selectedNode);
 		}
 	};
 
-	handleSubmitButtonClick = () => this.handleSubmit(this.state.selectedNode);
+	handleSubmitButtonClick = () => {
+		this.handleSubmit(this.state.selectedNode);
+	};
 
 	render() {
 		const {
