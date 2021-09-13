@@ -1,5 +1,6 @@
 ---
 category: add-on/fontoxml-nodes-browser
+fontosdk: true
 ---
 
 # Nodes browser library
