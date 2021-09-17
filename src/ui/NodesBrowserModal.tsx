@@ -132,6 +132,7 @@ class NodesBrowserModal extends Component<
 				searchInput === ''
 					? this.initialNodes
 					: this.filterInitialNodes(searchInput),
+			selectedNode: null,
 		});
 	};
 

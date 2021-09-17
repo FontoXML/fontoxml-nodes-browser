@@ -1,5 +1,4 @@
 import {
-	Block,
 	Flex,
 	Label,
 	ListItem,
@@ -57,7 +56,7 @@ class NodesList extends PureComponent {
 		} = this.props;
 
 		return (
-			<Block flex="1" isScrollContainer>
+			<Flex flex="1" flexDirection="column">
 				{nodes.length !== 0 && (
 					<Flex justifyContent="center" paddingSize="m">
 						{this.renderResultsCounter(nodes.length, searchInput)}
@@ -100,7 +99,7 @@ class NodesList extends PureComponent {
 						}
 					/>
 				)}
-			</Block>
+			</Flex>
 		);
 	}
 }
