@@ -21,6 +21,7 @@ import t from 'fontoxml-localization/src/t';
 import operationsManager from 'fontoxml-operations/src/operationsManager';
 import evaluateXPathToNodes from 'fontoxml-selectors/src/evaluateXPathToNodes';
 import evaluateXPathToString from 'fontoxml-selectors/src/evaluateXPathToString';
+import xq from 'fontoxml-selectors/src/xq';
 
 import NodesList from './NodesList';
 
@@ -48,7 +49,7 @@ const createViewModelsForNodes = (linkableElementsQuery) =>
 
 					let shortLabel =
 						evaluateXPathToString(
-							'fonto:title-content(.)',
+							xq`fonto:title-content(.)`,
 							node,
 							readOnlyBlueprint
 						) || searchLabel;
@@ -60,7 +61,7 @@ const createViewModelsForNodes = (linkableElementsQuery) =>
 
 					const markupLabel = upperCaseFirstLetter(
 						evaluateXPathToString(
-							'fonto:markup-label(.)',
+							xq`fonto:markup-label(.)`,
 							node,
 							readOnlyBlueprint
 						) || node.nodeName
