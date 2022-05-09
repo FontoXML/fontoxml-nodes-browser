@@ -1,3 +1,5 @@
+import React, { Component } from 'react';
+
 import {
 	Button,
 	Flex,
@@ -9,12 +11,10 @@ import {
 	ModalHeader,
 	SearchInput,
 } from 'fds/components';
-import React, { Component } from 'react';
-
+import blueprintQuery from 'fontoxml-blueprints/src/blueprintQuery';
 import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
 import documentsManager from 'fontoxml-documents/src/documentsManager';
 import getNodeId from 'fontoxml-dom-identification/src/getNodeId';
-import domQuery from 'fontoxml-dom-utils/src/domQuery';
 import FxNodePreview from 'fontoxml-fx/src/FxNodePreview';
 import type { ModalProps } from 'fontoxml-fx/src/types';
 import t from 'fontoxml-localization/src/t';
@@ -45,7 +45,10 @@ const createViewModelsForNodes = (linkableElementsQuery) =>
 			return displayedNodes.concat(
 				nodes.map((node) => {
 					// Used for searches
-					const searchLabel = domQuery.getTextContent(node);
+					const searchLabel = blueprintQuery.getTextContent(
+						readOnlyBlueprint,
+						node
+					);
 
 					let shortLabel =
 						evaluateXPathToString(
