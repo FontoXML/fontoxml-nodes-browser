@@ -9,7 +9,13 @@ import {
 	ModalHeader,
 	SearchInput,
 } from 'fds/components';
-import React, { Component } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 
 import blueprintQuery from 'fontoxml-blueprints/src/blueprintQuery';
 import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
@@ -17,23 +23,31 @@ import documentsManager from 'fontoxml-documents/src/documentsManager';
 import getNodeId from 'fontoxml-dom-identification/src/getNodeId';
 import FxNodePreview from 'fontoxml-fx/src/FxNodePreview';
 import type { ModalProps } from 'fontoxml-fx/src/types';
+import useOperation from 'fontoxml-fx/src/useOperation';
 import t from 'fontoxml-localization/src/t';
 import operationsManager from 'fontoxml-operations/src/operationsManager';
 import evaluateXPathToNodes from 'fontoxml-selectors/src/evaluateXPathToNodes';
 import evaluateXPathToString from 'fontoxml-selectors/src/evaluateXPathToString';
 import xq from 'fontoxml-selectors/src/xq';
 
+import type { NodeViewModel } from './NodesList';
 import NodesList from './NodesList';
 
-function upperCaseFirstLetter(input) {
-	const firstCharacter = String.fromCodePoint(input.codePointAt(0));
-	return firstCharacter.toUpperCase() + input.substr(firstCharacter.length);
+function upperCaseFirstLetter(input: string): string {
+	const firstCodePoint = input.codePointAt(0);
+	if (!firstCodePoint) {
+		return '';
+	}
+	const firstCharacter = String.fromCodePoint(firstCodePoint);
+	return (
+		firstCharacter.toUpperCase() + input.substring(firstCharacter.length)
+	);
 }
 
-const createViewModelsForNodes = (linkableElementsQuery) =>
+const createViewModelsForNodes = (linkableElementsQuery): NodeViewModel[] =>
 	documentsManager
 		.getAllDocumentIds({ 'cap/operable': true })
-		.reduce((displayedNodes, documentId) => {
+		.flatMap((documentId) => {
 			const documentNode = documentsManager.getDocumentNode(documentId);
 
 			const nodes = evaluateXPathToNodes(
@@ -42,49 +56,40 @@ const createViewModelsForNodes = (linkableElementsQuery) =>
 				readOnlyBlueprint
 			);
 
-			return displayedNodes.concat(
-				nodes.map((node) => {
-					// Used for searches
-					const searchLabel = blueprintQuery.getTextContent(
-						readOnlyBlueprint,
-						node
-					);
+			return nodes.map((node) => {
+				// Used for searches
+				const textContent = blueprintQuery.getTextContent(
+					readOnlyBlueprint,
+					node
+				);
+				const markupLabel = upperCaseFirstLetter(
+					evaluateXPathToString(
+						xq`fonto:markup-label(.)`,
+						node,
+						readOnlyBlueprint
+					)
+				);
 
-					let shortLabel =
-						evaluateXPathToString(
-							xq`fonto:title-content(.)`,
-							node,
-							readOnlyBlueprint
-						) || searchLabel;
-					if (shortLabel === '') {
-						shortLabel = t('(Empty element)');
-					}
+				const titleContent = evaluateXPathToString(
+					xq`fonto:title-content(.)`,
+					node,
+					readOnlyBlueprint
+				);
 
-					const nodeId = getNodeId(node);
-
-					const markupLabel = upperCaseFirstLetter(
-						evaluateXPathToString(
-							xq`fonto:markup-label(.)`,
-							node,
-							readOnlyBlueprint
-						) || node.nodeName
-					);
-
-					return {
-						documentId,
-						markupLabel,
-						nodeId,
-						searchLabel,
-						shortLabel,
-						id: nodeId,
-					};
-				})
-			);
-		}, []);
+				return {
+					documentId,
+					nodeId: getNodeId(node),
+					markupLabel,
+					shortLabel:
+						titleContent || textContent || t('(Empty element)'),
+					textContent,
+				};
+			});
+		});
 
 const searchInputContainerStyles = { maxWidth: '20rem', width: '100%' };
 
-class NodesBrowserModal extends Component<
+const NodesBrowserModal: React.FC<
 	ModalProps<{
 		documentId?: string;
 		insertOperationName?: string;
@@ -94,223 +99,193 @@ class NodesBrowserModal extends Component<
 		modalTitle: string;
 		nodeId?: string;
 	}>
-> {
-	initialNodes = createViewModelsForNodes(
-		this.props.data.linkableElementsQuery
+> = ({ data, submitModal, cancelModal }) => {
+	const initialNodes = useMemo(
+		() => createViewModelsForNodes(data.linkableElementsQuery),
+		[data.linkableElementsQuery]
 	);
 
-	initialSelectedNode =
-		this.initialNodes.find(
-			(node) => node.nodeId === this.props.data.nodeId
-		) || null;
-
-	isMountedInDOM = false;
-
-	searchInputRef = null;
-
-	state = {
-		displayedNodes: this.initialNodes,
-		isSubmitButtonDisabled:
-			(this.initialSelectedNode &&
-				!!this.props.data.insertOperationName) ||
-			!this.initialSelectedNode,
-		searchInput: '',
-		selectedNode: this.initialSelectedNode,
-	};
-
-	filterInitialNodes = (searchInput) =>
-		this.initialNodes.filter(
+	// Nodes can be filtered with a search query
+	const [searchQuery, setSearchQuery] = useState('');
+	const displayedNodes = useMemo(() => {
+		const lowerCaseQuery = searchQuery.toLowerCase();
+		return initialNodes.filter(
 			(node) =>
-				node.markupLabel
-					.toLowerCase()
-					.includes(searchInput.toLowerCase()) ||
-				node.searchLabel
-					.toLowerCase()
-					.includes(searchInput.toLowerCase())
+				node.shortLabel.toLowerCase().includes(lowerCaseQuery) ||
+				node.textContent.toLowerCase().includes(lowerCaseQuery) ||
+				node.markupLabel.toLowerCase().includes(lowerCaseQuery)
 		);
+	}, [initialNodes, searchQuery]);
 
-	handleSearchInputChange = (searchInput) => {
-		this.setState({
-			searchInput,
-			displayedNodes:
-				searchInput === ''
-					? this.initialNodes
-					: this.filterInitialNodes(searchInput),
-			selectedNode: null,
-		});
-	};
+	// A node can be selected by the user
+	const [selectedNode, setSelectedNode] = useState(
+		() => initialNodes.find((node) => node.nodeId === data.nodeId) || null
+	);
+	const handleNodeListItemClick = useCallback(
+		(selectedNode: NodeViewModel) => {
+			setSelectedNode(selectedNode);
+		},
+		[]
+	);
 
-	handleSearchInputRef = (searchInputRef) =>
-		(this.searchInputRef = searchInputRef);
+	// Changing the query unselects the selected node
+	const handleSearchInputChange = useCallback((searchQuery: string) => {
+		setSearchQuery(searchQuery);
+		setSelectedNode(null);
+	}, []);
 
-	determineSubmitButtonState = (selectedNode) => {
-		const { insertOperationName } = this.props.data;
+	// The insert button is enabled if a node is selected and there either is
+	// no configured insertOperationName or that operation is enabled for the
+	// selected item
+	const operationData = useMemo(
+		() => ({
+			...data,
+			nodeId: selectedNode?.nodeId,
+			documentId: selectedNode?.documentId,
+		}),
+		[selectedNode, data]
+	);
+	const { operationState } = useOperation(
+		selectedNode && data.insertOperationName
+			? data.insertOperationName
+			: 'do-nothing',
+		operationData
+	);
+	const isSubmitButtonDisabled = !selectedNode || !operationState.enabled;
 
-		if (selectedNode && insertOperationName) {
+	// The modal can be submitted in various ways...
+	const handleSubmit = useCallback(
+		(selectedNode: NodeViewModel | null) => {
+			if (!selectedNode || !operationState.enabled) {
+				return;
+			}
+			submitModal({
+				nodeId: selectedNode.nodeId,
+				documentId: selectedNode.documentId,
+			} as never);
+		},
+		[submitModal, operationState]
+	);
+
+	// ...by pressing enter (or escape to cancel it)
+	const handleKeyDown = useCallback(
+		(event: KeyboardEvent) => {
+			switch (event.key) {
+				case 'Escape':
+					event.preventDefault();
+					cancelModal();
+					break;
+				case 'Enter':
+					event.preventDefault();
+					handleSubmit(selectedNode);
+					break;
+			}
+		},
+		[cancelModal, handleSubmit, selectedNode]
+	);
+
+	// ...by clicking the submit button
+	const handleSubmitButtonClick = useCallback(() => {
+		handleSubmit(selectedNode);
+	}, [handleSubmit, selectedNode]);
+
+	// ...or by double-clicking an item
+	const isMountedInDomRef = useRef(true);
+	useEffect(() => {
+		return () => {
+			isMountedInDomRef.current = false;
+		};
+	});
+	const handleItemDoubleClick = useCallback(
+		async (selectedNode: NodeViewModel) => {
+			if (!data.insertOperationName) {
+				handleSubmit(selectedNode);
+				return;
+			}
+
+			// We should check that the insert operation is enabled for this node
 			const initialData = {
-				...this.props.data,
+				...data,
 				nodeId: selectedNode.nodeId,
 				documentId: selectedNode.documentId,
 			};
 
-			operationsManager
-				.getOperationState(insertOperationName, initialData)
-				.then((operationState) => {
-					this.isMountedInDOM &&
-						this.setState({
-							isSubmitButtonDisabled: !operationState.enabled,
-						});
-				})
-				.catch((_) => {
-					this.isMountedInDOM &&
-						this.setState({ isSubmitButtonDisabled: true });
-				});
+			const operationState = await operationsManager.getOperationState(
+				data.insertOperationName,
+				initialData
+			);
+			if (!isMountedInDomRef.current || !operationState.enabled) {
+				return;
+			}
+			handleSubmit(selectedNode);
+		},
+		[data, handleSubmit]
+	);
+
+	// Auto-focus the search input when opening the modal
+	const searchInputRef = useRef<HTMLElement>();
+	useEffect(() => {
+		if (searchInputRef.current) {
+			searchInputRef.current.focus();
 		}
-	};
+	}, []);
 
-	handleNodeListItemClick = (selectedNode) => {
-		this.setState({
-			selectedNode,
-			isSubmitButtonDisabled:
-				(selectedNode && !!this.props.data.insertOperationName) ||
-				!selectedNode,
-		});
+	return (
+		<Modal size="l" onKeyDown={handleKeyDown}>
+			<ModalHeader icon={data.modalIcon} title={data.modalTitle ?? ''} />
 
-		this.determineSubmitButtonState(selectedNode);
-	};
+			<ModalBody>
+				<ModalContent flexDirection="column">
+					<ModalContentToolbar>
+						<Flex applyCss={searchInputContainerStyles}>
+							<SearchInput
+								onChange={handleSearchInputChange}
+								ref={searchInputRef}
+								value={searchQuery}
+								data-test-id="nodes-browser-modal-search-input"
+							/>
+						</Flex>
+					</ModalContentToolbar>
 
-	handleSubmit = (node) => {
-		this.props.submitModal({
-			nodeId: node.nodeId,
-			documentId: node.documentId,
-		});
-	};
+					<ModalContent>
+						<ModalContent flex="1">
+							<NodesList
+								nodes={displayedNodes}
+								onItemClick={handleNodeListItemClick}
+								onItemDoubleClick={handleItemDoubleClick}
+								searchQuery={searchQuery}
+								selectedNode={selectedNode}
+							/>
+						</ModalContent>
 
-	handleKeyDown = (event) => {
-		switch (event.key) {
-			case 'Escape':
-				this.props.cancelModal();
-				break;
-			case 'Enter':
-				if (!this.state.isSubmitButtonDisabled) {
-					this.handleSubmit(this.state.selectedNode);
-				}
-				break;
-		}
-	};
-
-	handleItemDoubleClick = (selectedNode) => {
-		const { insertOperationName } = this.props.data;
-
-		if (insertOperationName) {
-			const initialData = {
-				...this.props.data,
-				nodeId: selectedNode.nodeId,
-				documentId: selectedNode.documentId,
-			};
-
-			operationsManager
-				.getOperationState(insertOperationName, initialData)
-				.then((operationState) => {
-					this.isMountedInDOM &&
-						operationState.enabled &&
-						this.handleSubmit(selectedNode);
-				})
-				.catch((_error) => {});
-		} else {
-			this.handleSubmit(selectedNode);
-		}
-	};
-
-	handleSubmitButtonClick = () => {
-		this.handleSubmit(this.state.selectedNode);
-	};
-
-	render() {
-		const {
-			displayedNodes,
-			isSubmitButtonDisabled,
-			searchInput,
-			selectedNode,
-		} = this.state;
-		const {
-			cancelModal,
-			data: { modalIcon, modalPrimaryButtonLabel, modalTitle },
-		} = this.props;
-
-		return (
-			<Modal size="l" onKeyDown={this.handleKeyDown}>
-				<ModalHeader icon={modalIcon} title={modalTitle} />
-
-				<ModalBody>
-					<ModalContent flexDirection="column">
-						<ModalContentToolbar>
-							<Flex applyCss={searchInputContainerStyles}>
-								<SearchInput
-									onChange={this.handleSearchInputChange}
-									ref={this.handleSearchInputRef}
-									value={searchInput}
-									data-test-id="nodes-browser-modal-search-input"
-								/>
-							</Flex>
-						</ModalContentToolbar>
-
-						<ModalContent>
-							<ModalContent flex="1">
-								<NodesList
-									nodes={displayedNodes}
-									onItemClick={this.handleNodeListItemClick}
-									onItemDoubleClick={
-										this.handleItemDoubleClick
-									}
-									searchInput={searchInput}
-									selectedNode={selectedNode}
+						{selectedNode && (
+							<ModalContent
+								flexDirection="column"
+								flex="2"
+								isScrollContainer
+							>
+								<FxNodePreview
+									documentId={selectedNode.documentId}
+									traversalRootNodeId={selectedNode.nodeId}
 								/>
 							</ModalContent>
-
-							{selectedNode && (
-								<ModalContent
-									flexDirection="column"
-									flex="2"
-									isScrollContainer
-								>
-									<FxNodePreview
-										documentId={selectedNode.documentId}
-										traversalRootNodeId={
-											selectedNode.nodeId
-										}
-									/>
-								</ModalContent>
-							)}
-						</ModalContent>
+						)}
 					</ModalContent>
-				</ModalBody>
+				</ModalContent>
+			</ModalBody>
 
-				<ModalFooter>
-					<Button label={t('Cancel')} onClick={cancelModal} />
+			<ModalFooter>
+				<Button label={t('Cancel')} onClick={cancelModal} />
 
-					<Button
-						type="primary"
-						label={modalPrimaryButtonLabel}
-						isDisabled={isSubmitButtonDisabled}
-						onClick={this.handleSubmitButtonClick}
-					/>
-				</ModalFooter>
-			</Modal>
-		);
-	}
-
-	componentDidMount() {
-		this.isMountedInDOM = true;
-
-		this.searchInputRef.focus();
-
-		this.determineSubmitButtonState(this.state.selectedNode);
-	}
-
-	componentWillUnmount() {
-		this.isMountedInDOM = false;
-	}
-}
+				<Button
+					type="primary"
+					label={data.modalPrimaryButtonLabel}
+					isDisabled={isSubmitButtonDisabled}
+					onClick={handleSubmitButtonClick}
+				/>
+			</ModalFooter>
+		</Modal>
+	);
+};
 
 export default NodesBrowserModal;
