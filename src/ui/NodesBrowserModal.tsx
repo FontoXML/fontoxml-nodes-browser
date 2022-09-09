@@ -1,5 +1,3 @@
-import React, { Component } from 'react';
-
 import {
 	Button,
 	Flex,
@@ -11,6 +9,8 @@ import {
 	ModalHeader,
 	SearchInput,
 } from 'fds/components';
+import React, { Component } from 'react';
+
 import blueprintQuery from 'fontoxml-blueprints/src/blueprintQuery';
 import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
 import documentsManager from 'fontoxml-documents/src/documentsManager';
@@ -250,6 +250,7 @@ class NodesBrowserModal extends Component<
 									onChange={this.handleSearchInputChange}
 									ref={this.handleSearchInputRef}
 									value={searchInput}
+									data-test-id="nodes-browser-modal-search-input"
 								/>
 							</Flex>
 						</ModalContentToolbar>
