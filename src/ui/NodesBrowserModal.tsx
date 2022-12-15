@@ -1,3 +1,7 @@
+import * as React from 'react';
+
+import blueprintQuery from 'fontoxml-blueprints/src/blueprintQuery';
+import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
 import {
 	Button,
 	Flex,
@@ -8,17 +12,7 @@ import {
 	ModalFooter,
 	ModalHeader,
 	SearchInput,
-} from 'fds/components';
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from 'react';
-
-import blueprintQuery from 'fontoxml-blueprints/src/blueprintQuery';
-import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
+} from 'fontoxml-design-system/src/components';
 import documentsManager from 'fontoxml-documents/src/documentsManager';
 import getNodeId from 'fontoxml-dom-identification/src/getNodeId';
 import FxNodePreview from 'fontoxml-fx/src/FxNodePreview';
@@ -26,6 +20,7 @@ import type { ModalProps } from 'fontoxml-fx/src/types';
 import useOperation from 'fontoxml-fx/src/useOperation';
 import t from 'fontoxml-localization/src/t';
 import operationsManager from 'fontoxml-operations/src/operationsManager';
+import type { OperationState } from 'fontoxml-operations/src/types';
 import evaluateXPathToNodes from 'fontoxml-selectors/src/evaluateXPathToNodes';
 import evaluateXPathToString from 'fontoxml-selectors/src/evaluateXPathToString';
 import xq from 'fontoxml-selectors/src/xq';
@@ -100,14 +95,14 @@ const NodesBrowserModal: React.FC<
 		nodeId?: string;
 	}>
 > = ({ data, submitModal, cancelModal }) => {
-	const initialNodes = useMemo(
+	const initialNodes = React.useMemo(
 		() => createViewModelsForNodes(data.linkableElementsQuery),
 		[data.linkableElementsQuery]
 	);
 
 	// Nodes can be filtered with a search query
-	const [searchQuery, setSearchQuery] = useState('');
-	const displayedNodes = useMemo(() => {
+	const [searchQuery, setSearchQuery] = React.useState('');
+	const displayedNodes = React.useMemo(() => {
 		const lowerCaseQuery = searchQuery.toLowerCase();
 		return initialNodes.filter(
 			(node) =>
@@ -118,10 +113,10 @@ const NodesBrowserModal: React.FC<
 	}, [initialNodes, searchQuery]);
 
 	// A node can be selected by the user
-	const [selectedNode, setSelectedNode] = useState(
+	const [selectedNode, setSelectedNode] = React.useState(
 		() => initialNodes.find((node) => node.nodeId === data.nodeId) || null
 	);
-	const handleNodeListItemClick = useCallback(
+	const handleNodeListItemClick = React.useCallback(
 		(selectedNode: NodeViewModel) => {
 			setSelectedNode(selectedNode);
 		},
@@ -129,15 +124,15 @@ const NodesBrowserModal: React.FC<
 	);
 
 	// Changing the query unselects the selected node
-	const handleSearchInputChange = useCallback((searchQuery: string) => {
+	const handleSearchInputChange = React.useCallback((searchQuery: string) => {
 		setSearchQuery(searchQuery);
 		setSelectedNode(null);
 	}, []);
 
-	// The insert button is enabled if a node is selected and there either is
+	// The submit button is enabled if a node is selected and there either is
 	// no configured insertOperationName or that operation is enabled for the
 	// selected item
-	const operationData = useMemo(
+	const operationData = React.useMemo(
 		() => ({
 			...data,
 			nodeId: selectedNode?.nodeId,
@@ -145,30 +140,41 @@ const NodesBrowserModal: React.FC<
 		}),
 		[selectedNode, data]
 	);
-	const { operationState } = useOperation(
-		selectedNode && data.insertOperationName
-			? data.insertOperationName
-			: 'do-nothing',
-		operationData
+	const operationName = React.useMemo(
+		() =>
+			selectedNode && data.insertOperationName
+				? data.insertOperationName
+				: 'do-nothing',
+		[data.insertOperationName, selectedNode]
 	);
-	const isSubmitButtonDisabled = !selectedNode || !operationState.enabled;
+	const { operationState } = useOperation(operationName, operationData);
+	const isSubmitButtonDisabled = React.useMemo(
+		() => !selectedNode || !operationState.enabled,
+		[operationState.enabled, selectedNode]
+	);
 
 	// The modal can be submitted in various ways...
-	const handleSubmit = useCallback(
-		(selectedNode: NodeViewModel | null) => {
+	const handleSubmit = React.useCallback(
+		(
+			selectedNode: NodeViewModel | null,
+			operationState: OperationState
+		) => {
+			// This cannot rely on the selectedNode state var or the
+			// operationState from useOperation, as those might not be up to
+			// date when double clicking, see handleItemDoubleClick as well.
 			if (!selectedNode || !operationState.enabled) {
 				return;
 			}
 			submitModal({
-				nodeId: selectedNode.nodeId,
-				documentId: selectedNode.documentId,
-			} as never);
+				nodeId: selectedNode.nodeId as never,
+				documentId: selectedNode.documentId as never,
+			});
 		},
-		[submitModal, operationState]
+		[submitModal]
 	);
 
 	// ...by pressing enter (or escape to cancel it)
-	const handleKeyDown = useCallback(
+	const handleKeyDown = React.useCallback(
 		(event: KeyboardEvent) => {
 			switch (event.key) {
 				case 'Escape':
@@ -177,54 +183,59 @@ const NodesBrowserModal: React.FC<
 					break;
 				case 'Enter':
 					event.preventDefault();
-					handleSubmit(selectedNode);
+					handleSubmit(selectedNode, operationState);
 					break;
 			}
 		},
-		[cancelModal, handleSubmit, selectedNode]
+		[cancelModal, handleSubmit, operationState, selectedNode]
 	);
 
 	// ...by clicking the submit button
-	const handleSubmitButtonClick = useCallback(() => {
-		handleSubmit(selectedNode);
-	}, [handleSubmit, selectedNode]);
+	const handleSubmitButtonClick = React.useCallback(() => {
+		handleSubmit(selectedNode, operationState);
+	}, [handleSubmit, operationState, selectedNode]);
 
 	// ...or by double-clicking an item
-	const isMountedInDomRef = useRef(true);
-	useEffect(() => {
+	const isMountedInDomRef = React.useRef(false);
+	React.useEffect(() => {
+		isMountedInDomRef.current = true;
 		return () => {
 			isMountedInDomRef.current = false;
 		};
-	});
-	const handleItemDoubleClick = useCallback(
+	}, []);
+	const handleItemDoubleClick = React.useCallback(
 		async (selectedNode: NodeViewModel) => {
-			if (!data.insertOperationName) {
-				handleSubmit(selectedNode);
-				return;
-			}
-
-			// We should check that the insert operation is enabled for this node
-			const initialData = {
-				...data,
-				nodeId: selectedNode.nodeId,
-				documentId: selectedNode.documentId,
-			};
-
+			// selectedNode is never null
+			const operationName = data.insertOperationName || 'do-nothing';
+			// When double clicking an item, the second click is so fast
+			// after the first click that while we are processing the initial
+			// click, which should update the selectedNode, that has not
+			// happened yet. And then especially updating the operationState in
+			// response to the new selectedNode has not happened yet.
+			// So we get the operationState here again based on the selectedNode
+			// that is being double clicked (param, not state var) and pass that
+			// along to handleSubmit, which then checks if we can submit.
 			const operationState = await operationsManager.getOperationState(
-				data.insertOperationName,
-				initialData
+				operationName,
+				{
+					...data,
+					nodeId: selectedNode?.nodeId,
+					documentId: selectedNode?.documentId,
+				}
 			);
-			if (!isMountedInDomRef.current || !operationState.enabled) {
+			// Because we await the operationState, we could've been unmounted
+			// while we (a)waited, so check for that first
+			if (!isMountedInDomRef.current) {
 				return;
 			}
-			handleSubmit(selectedNode);
+			handleSubmit(selectedNode, operationState);
 		},
 		[data, handleSubmit]
 	);
 
 	// Auto-focus the search input when opening the modal
-	const searchInputRef = useRef<HTMLElement>();
-	useEffect(() => {
+	const searchInputRef = React.useRef<HTMLElement>();
+	React.useEffect(() => {
 		if (searchInputRef.current) {
 			searchInputRef.current.focus();
 		}
@@ -232,7 +243,7 @@ const NodesBrowserModal: React.FC<
 
 	return (
 		<Modal size="l" onKeyDown={handleKeyDown}>
-			<ModalHeader icon={data.modalIcon} title={data.modalTitle ?? ''} />
+			<ModalHeader icon={data.modalIcon} title={data.modalTitle} />
 
 			<ModalBody>
 				<ModalContent flexDirection="column">
