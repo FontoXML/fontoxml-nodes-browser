@@ -141,11 +141,8 @@ const NodesBrowserModal: React.FC<
 		[selectedNode, data]
 	);
 	const operationName = React.useMemo(
-		() =>
-			selectedNode && data.insertOperationName
-				? data.insertOperationName
-				: 'do-nothing',
-		[data.insertOperationName, selectedNode]
+		() => data.insertOperationName || 'do-nothing',
+		[data.insertOperationName]
 	);
 	const { operationState } = useOperation(operationName, operationData);
 	const isSubmitButtonDisabled = React.useMemo(
