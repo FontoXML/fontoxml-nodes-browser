@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
 	Flex,
 	Label,
@@ -5,9 +7,7 @@ import {
 	StateMessage,
 	Text,
 	VirtualList,
-} from 'fds/components';
-import React, { useCallback } from 'react';
-
+} from 'fontoxml-design-system/src/components';
 import type { DocumentId } from 'fontoxml-documents/src/types';
 import type { NodeId } from 'fontoxml-dom-identification/src/types';
 import t from 'fontoxml-localization/src/t';
@@ -22,12 +22,12 @@ export type NodeViewModel = {
 
 const NodesList: React.FC<{
 	nodes: NodeViewModel[];
-	onItemClick(NodeViewModel): void;
-	onItemDoubleClick(NodeViewModel): void;
+	onItemClick(node: NodeViewModel): void;
+	onItemDoubleClick(node: NodeViewModel): void;
 	searchQuery: string;
 	selectedNode: NodeViewModel | null;
 }> = ({ nodes, onItemClick, onItemDoubleClick, searchQuery, selectedNode }) => {
-	const handleRenderItem = useCallback(
+	const handleRenderItem = React.useCallback(
 		({ key, item, onClick, onDoubleClick, onRef }) => (
 			<ListItem
 				key={key}
