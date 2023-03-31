@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useCallback } from 'react';
 
 import {
 	Flex,
@@ -20,14 +21,14 @@ export type NodeViewModel = {
 	textContent: string;
 };
 
-const NodesList: React.FC<{
+const NodesList: FC<{
 	nodes: NodeViewModel[];
 	onItemClick(node: NodeViewModel): void;
 	onItemDoubleClick(node: NodeViewModel): void;
 	searchQuery: string;
 	selectedNode: NodeViewModel | null;
 }> = ({ nodes, onItemClick, onItemDoubleClick, searchQuery, selectedNode }) => {
-	const handleRenderItem = React.useCallback(
+	const handleRenderItem = useCallback(
 		({ key, item, onClick, onDoubleClick, onRef }) => (
 			<ListItem
 				key={key}

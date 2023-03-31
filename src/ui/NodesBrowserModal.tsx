@@ -1,4 +1,5 @@
-import * as React from 'react';
+import type { FC } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import blueprintQuery from 'fontoxml-blueprints/src/blueprintQuery';
 import readOnlyBlueprint from 'fontoxml-blueprints/src/readOnlyBlueprint';
@@ -84,7 +85,7 @@ const createViewModelsForNodes = (linkableElementsQuery): NodeViewModel[] =>
 
 const searchInputContainerStyles = { maxWidth: '20rem', width: '100%' };
 
-const NodesBrowserModal: React.FC<
+const NodesBrowserModal: FC<
 	ModalProps<{
 		documentId?: string;
 		insertOperationName?: string;
@@ -95,14 +96,14 @@ const NodesBrowserModal: React.FC<
 		nodeId?: string;
 	}>
 > = ({ data, submitModal, cancelModal }) => {
-	const initialNodes = React.useMemo(
+	const initialNodes = useMemo(
 		() => createViewModelsForNodes(data.linkableElementsQuery),
 		[data.linkableElementsQuery]
 	);
 
 	// Nodes can be filtered with a search query
-	const [searchQuery, setSearchQuery] = React.useState('');
-	const displayedNodes = React.useMemo(() => {
+	const [searchQuery, setSearchQuery] = useState('');
+	const displayedNodes = useMemo(() => {
 		const lowerCaseQuery = searchQuery.toLowerCase();
 		return initialNodes.filter(
 			(node) =>
@@ -113,10 +114,10 @@ const NodesBrowserModal: React.FC<
 	}, [initialNodes, searchQuery]);
 
 	// A node can be selected by the user
-	const [selectedNode, setSelectedNode] = React.useState(
+	const [selectedNode, setSelectedNode] = useState(
 		() => initialNodes.find((node) => node.nodeId === data.nodeId) || null
 	);
-	const handleNodeListItemClick = React.useCallback(
+	const handleNodeListItemClick = useCallback(
 		(selectedNode: NodeViewModel) => {
 			setSelectedNode(selectedNode);
 		},
@@ -124,7 +125,7 @@ const NodesBrowserModal: React.FC<
 	);
 
 	// Changing the query unselects the selected node
-	const handleSearchInputChange = React.useCallback((searchQuery: string) => {
+	const handleSearchInputChange = useCallback((searchQuery: string) => {
 		setSearchQuery(searchQuery);
 		setSelectedNode(null);
 	}, []);
@@ -132,7 +133,7 @@ const NodesBrowserModal: React.FC<
 	// The submit button is enabled if a node is selected and there either is
 	// no configured insertOperationName or that operation is enabled for the
 	// selected item
-	const operationData = React.useMemo(
+	const operationData = useMemo(
 		() => ({
 			...data,
 			nodeId: selectedNode?.nodeId,
@@ -140,18 +141,18 @@ const NodesBrowserModal: React.FC<
 		}),
 		[selectedNode, data]
 	);
-	const operationName = React.useMemo(
+	const operationName = useMemo(
 		() => data.insertOperationName || 'do-nothing',
 		[data.insertOperationName]
 	);
 	const { operationState } = useOperation(operationName, operationData);
-	const isSubmitButtonDisabled = React.useMemo(
+	const isSubmitButtonDisabled = useMemo(
 		() => !selectedNode || !operationState.enabled,
 		[operationState.enabled, selectedNode]
 	);
 
 	// The modal can be submitted in various ways...
-	const handleSubmit = React.useCallback(
+	const handleSubmit = useCallback(
 		(
 			selectedNode: NodeViewModel | null,
 			operationState: OperationState
@@ -171,7 +172,7 @@ const NodesBrowserModal: React.FC<
 	);
 
 	// ...by pressing enter (or escape to cancel it)
-	const handleKeyDown = React.useCallback(
+	const handleKeyDown = useCallback(
 		(event: KeyboardEvent) => {
 			switch (event.key) {
 				case 'Escape':
@@ -188,19 +189,19 @@ const NodesBrowserModal: React.FC<
 	);
 
 	// ...by clicking the submit button
-	const handleSubmitButtonClick = React.useCallback(() => {
+	const handleSubmitButtonClick = useCallback(() => {
 		handleSubmit(selectedNode, operationState);
 	}, [handleSubmit, operationState, selectedNode]);
 
 	// ...or by double-clicking an item
-	const isMountedInDomRef = React.useRef(false);
-	React.useEffect(() => {
+	const isMountedInDomRef = useRef(false);
+	useEffect(() => {
 		isMountedInDomRef.current = true;
 		return () => {
 			isMountedInDomRef.current = false;
 		};
 	}, []);
-	const handleItemDoubleClick = React.useCallback(
+	const handleItemDoubleClick = useCallback(
 		async (selectedNode: NodeViewModel) => {
 			// selectedNode is never null
 			const operationName = data.insertOperationName || 'do-nothing';
@@ -231,8 +232,8 @@ const NodesBrowserModal: React.FC<
 	);
 
 	// Auto-focus the search input when opening the modal
-	const searchInputRef = React.useRef<HTMLElement>();
-	React.useEffect(() => {
+	const searchInputRef = useRef<HTMLElement>();
+	useEffect(() => {
 		if (searchInputRef.current) {
 			searchInputRef.current.focus();
 		}
