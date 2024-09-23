@@ -248,10 +248,10 @@ const NodesBrowserModal: FC<
 					<ModalContentToolbar>
 						<Flex applyCss={searchInputContainerStyles}>
 							<SearchInput
+								dataTestId="nodes-browser-modal-search-input"
 								onChange={handleSearchInputChange}
 								ref={searchInputRef}
 								value={searchQuery}
-								data-test-id="nodes-browser-modal-search-input"
 							/>
 						</Flex>
 					</ModalContentToolbar>
