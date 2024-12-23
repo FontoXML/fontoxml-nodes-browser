@@ -103,9 +103,7 @@ const NodesList: FC<{
 					onItemDoubleClick={onItemDoubleClick}
 					paddingSize="s"
 					renderItem={handleRenderItem}
-					idToScrollIntoView={
-						selectedNode ? selectedNode.nodeId : null
-					}
+					idToScrollIntoView={selectedNode?.nodeId}
 				/>
 			)}
 		</Flex>
